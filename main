@@ -1,0 +1,61 @@
+#include <invensense_imu.h>
+#include <invensense_imu.h>
+#include "mpu6500.h"
+#include <map>
+
+bfs::Mpu6500 imu;
+
+void setup() {
+Serial.begin(115200);
+
+
+//Arduino start
+Wire.begin();  
+unsigned long startMillis = millis();  //initial start time
+Wire.setClock(400000);
+  /* I2C bus,  0x68 address */
+  imu.Config(&Wire, bfs::Mpu6500::I2C_ADDR_PRIM);
+  /* Initialize and configure IMU */
+  if (!imu.Begin()) {
+    Serial.println("Error initializing communication with IMU");
+  }
+  /* Set the sample rate divider */
+  int rate = 4; //Hz
+  int srd = 1000/rate - 1;
+  if (!imu.ConfigSrd(srd)) {
+    Serial.println("Error configured SRD");
+  }
+
+map<unsigned long, float> acceleration;
+
+}
+
+void loop() {
+  
+  if (imu.Read()) {
+  bool new_data = imu.new_imu_data();
+	if(!new_data)
+		Serial.print("No new data received"); 
+	else{ 
+  	  //get the current "time" (actually the number of milliseconds since the program started)
+	//Acceleration
+  	float ax = imu.accel_x_mps2();
+	float ay = imu.accel_y_mps2();
+  	float az = imu.accel_z_mps2();
+	float a = sqrt(ax*ax+ay*ay+az*az)-9.8;
+  Serial.print(a); 
+  Serial.print("\n");
+	//timestamp = millis() -startMillis;
+	//acceleration[timestamp] = a;	
+	}
+}
+
+    // Get an iterator pointing to the first element in the map
+    //map<long, float>::iterator it = acceleration.begin();
+
+    // Iterate through the map and print the elements
+    //while (it != acceleration.end()) {
+      //  Serial.print("Time: "+ it->first + ", Acceleration: " + it->second + ++it);
+    //}
+
+}
