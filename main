@@ -1,13 +1,16 @@
 #include <invensense_imu.h>
 #include <invensense_imu.h>
 #include "mpu6500.h"
-#include <map>
+#include "ThingSpeak.h"
 
 bfs::Mpu6500 imu;
 
 void setup() {
 Serial.begin(115200);
 
+//ThingSpeak configuration
+const char * writeAPIKey = 'J4RNLI2H11VJYNLK';
+unsigned long channelID = 2733511;
 
 //Arduino start
 Wire.begin();  
@@ -26,7 +29,7 @@ Wire.setClock(400000);
     Serial.println("Error configured SRD");
   }
 
-map<unsigned long, float> acceleration;
+//map<unsigned long, float> acceleration;
 
 }
 
@@ -47,6 +50,13 @@ void loop() {
   Serial.print("\n");
 	//timestamp = millis() -startMillis;
 	//acceleration[timestamp] = a;	
+  int x = ThingSpeak.writeField(channelID, 1, a, WriteAPIKey);
+  if(x == 200){
+    Serial.println("Channel update successful.");
+  }
+  else{
+    Serial.println("Problem updating channel. HTTP error code " + String(x));
+  }
 	}
 }
 
